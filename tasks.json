@@ -1,0 +1,82 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "text": "study chapter 3 tonight",
+      "priority": "medium",
+      "done": true,
+      "created_at": "2026-05-26 19:05"
+    },
+    {
+      "id": 2,
+      "text": "buy nursing textbook",
+      "priority": "high",
+      "done": false,
+      "created_at": "2026-05-26 19:08"
+    },
+    {
+      "id": 3,
+      "text": "call hospital admin",
+      "priority": "medium",
+      "done": false,
+      "created_at": "2026-05-26 19:08"
+    },
+    {
+      "id": 11,
+      "text": "Monday evening 6-8pm: Study Chapter 1 (nursing exam prep)",
+      "priority": "high",
+      "done": false,
+      "created_at": "2026-05-27 15:22"
+    },
+    {
+      "id": 12,
+      "text": "Tuesday evening 6-8pm: Study Chapter 2 (nursing exam prep)",
+      "priority": "high",
+      "done": false,
+      "created_at": "2026-05-27 15:22"
+    },
+    {
+      "id": 13,
+      "text": "Wednesday evening 6-8pm: Review Chapters 1-2 and practice questions",
+      "priority": "high",
+      "done": false,
+      "created_at": "2026-05-27 15:22"
+    },
+    {
+      "id": 14,
+      "text": "Thursday evening 6-8pm: Study Chapter 3 (nursing exam prep)",
+      "priority": "high",
+      "done": false,
+      "created_at": "2026-05-27 15:22"
+    },
+    {
+      "id": 15,
+      "text": "Friday evening 6-8pm: Study Chapter 4 (nursing exam prep)",
+      "priority": "high",
+      "done": false,
+      "created_at": "2026-05-27 15:22"
+    },
+    {
+      "id": 16,
+      "text": "Saturday 9am-12pm: Study Chapter 5 (nursing exam prep)",
+      "priority": "high",
+      "done": false,
+      "created_at": "2026-05-27 15:22"
+    },
+    {
+      "id": 17,
+      "text": "Saturday 2-5pm: Comprehensive review of all 5 chapters",
+      "priority": "high",
+      "done": false,
+      "created_at": "2026-05-27 15:22"
+    },
+    {
+      "id": 18,
+      "text": "Sunday evening 6-8pm: Final practice exam and weak areas review",
+      "priority": "high",
+      "done": false,
+      "created_at": "2026-05-27 15:22"
+    }
+  ],
+  "next_id": 19
+}
