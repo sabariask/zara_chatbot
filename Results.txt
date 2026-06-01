@@ -1,0 +1,1089 @@
+Results
+Exam Results
+564 / 1000
+NOT PASSED
+16 of 28 correct (57%) · Pass mark: 720
+Domain Breakdown
+D1
+Agentic Architecture & Orchestration
+3/6(50%)+135pts
+D2
+Tool Design & MCP Integration
+2/5(40%)+72pts
+D3
+Claude Code Configuration & Workflows
+2/6(33%)+67pts
+D4
+Prompt Engineering & Structured Output
+6/6(100%)+200pts
+D5
+Context Management & Reliability
+3/5(60%)+90pts
+How scoring works
+
+Each domain's percentage correct is multiplied by its weight and scaled to 1000 points. For example, scoring 80% in Agentic Architecture (27% weight) contributes 0.80 × 0.27 × 1000 = 216 points. The pass mark is 720/1000 (72%). If a domain has no questions in the selected scenarios, its weight is redistributed proportionally among assessed domains.
+
+Hide Detail
+Take Another Exam
+Question-by-Question Review
+Q01
+·
+D3
+3.4 permissions-security / allowed-tools
+q-3-4-004
+·
+Code Generation with Claude Code
+Incorrect
+A junior developer is using Claude Code to refactor a payment processing module. The team lead wants to ensure Claude Code cannot accidentally delete production configuration files or modify the database migration directory during the refactoring session. What is the most appropriate approach?
+
+
+D
+Set the repository to read-only mode at the filesystem level before starting the session
+
+Making the entire repository read-only would prevent Claude Code from making any changes, including the legitimate refactoring of the payment module. The requirement is selective protection, not blanket read-only access.
+
+
+A
+Instruct the developer to use plan mode so Claude Code will ask for approval before each file change
+
+Plan mode helps with evaluating strategies for complex tasks, but it does not provide file-level access control. Even in plan mode, the model can still access all tools and directories once execution begins.(your answer)
+
+
+C
+Add a rule in CLAUDE.md stating 'Never modify files in the config/ or migrations/ directories'
+
+CLAUDE.md instructions rely on the model's compliance and are not deterministic safeguards. For production-critical protection, tool-level permission restrictions provide reliable enforcement rather than natural language instructions.
+
+
+B
+Configure allowedTools to restrict the session to only Read, Grep, Glob, and Write for files within the payment module directory
+
+allowedTools provides tool-level permission control that can restrict which tools are available and their scope. By limiting write access to the payment module directory and keeping read access for context, the team lead ensures Claude Code cannot modify production config or migration files.(correct answer)
+
+Where this comes from
+
+Claude Code: Settings↗
+Q02
+·
+D5
+5.1 context-window-management / tool-result-trimming
+q-5-1-005
+·
+Enterprise Data Platform with Federated Queries
+Incorrect
+An analytics agent queries Snowflake and receives 40+ columns per row, only 5 of which are relevant to the user's question about quarterly revenue. The agent appends the full result set to context. After three such queries the window is nearly full and follow-up questions fail. What is the most effective fix?
+
+
+C
+Store all query results in an external database and have the agent retrieve specific values on demand instead of keeping results in context.
+
+External storage adds infrastructure complexity without addressing the core issue. The agent still needs some result data in context to reason about it. Trimming irrelevant fields is simpler and directly reduces context consumption.(your answer)
+
+
+B
+Trim tool results to only the relevant columns before appending them to the conversation context.
+
+Tool result trimming removes irrelevant fields before they enter the context window. Keeping only the 5 relevant columns from each 40+ column result set dramatically reduces token consumption, allowing the agent to handle many more queries within the same context budget.(correct answer)
+
+
+A
+Upgrade to a model with a larger context window so that full result sets can be accommodated across more queries.
+
+A larger context window postpones the problem but does not solve it. Each full result set still wastes tokens on 35+ irrelevant columns, and the context will eventually fill regardless of size.
+
+
+D
+Limit the number of rows returned by each query to reduce the total data volume in context.
+
+Row limits reduce data volume but may exclude relevant rows. The problem is column-level verbosity (35+ irrelevant columns per row), not row count. Trimming columns preserves all relevant rows whilst eliminating irrelevant fields.
+
+Where this comes from
+
+Lesson 5.1: Context Window Management (Tool result trimming)
+Lesson 5.1: Context Window Management (Upstream optimisation)
+Q03
+·
+D4
+4.2 structured-output / few-shot-coded-content
+q-4-2-006
+·
+Content Moderation and Classification System
+Correct
+The moderation system classifies hate speech accurately for explicit slurs but misses coded language and dog-whistle terms that human moderators easily recognise. The prompt includes detailed written rules about coded language patterns. What intervention would most improve detection of coded hate speech?
+
+
+C
+Add 20+ examples covering every known category of coded hate speech to maximise coverage
+
+Laundry lists of examples dilute attention and teach pattern-matching rather than generalisation. 2-4 targeted examples with reasoning are more effective than 20 examples without reasoning because they teach the analytical process.
+
+
+D
+Increase the model's context window so it can consider more of the user's post history for context
+
+Context window size is not the bottleneck. The model fails to recognise coded language in individual posts, which is a prompt engineering issue, not a context limitation.
+
+
+A
+Add a comprehensive dictionary of all known coded terms and dog-whistles to the system prompt
+
+A static dictionary becomes outdated immediately as coded language constantly evolves. It also bloats the prompt without teaching the model to recognise the underlying patterns of coded speech.
+
+
+B
+Add 2-4 few-shot examples showing coded hate speech alongside the reasoning that identifies the coded language, the targeted group, and why the surface text appears innocuous
+
+Few-shot examples with reasoning tags teach the model the pattern-recognition process, not just individual terms. Showing the reasoning chain — surface meaning, coded meaning, targeted group, contextual signals — enables the model to generalise to new coded terms it has not seen before.
+
+Where this comes from
+
+Lesson 4.4: Few-Shot Prompting (Few-shot for nuanced detection)
+Anthropic: Multishot (Few-Shot) Prompting↗
+Q04
+·
+D2
+2.1 tool-schema-design / descriptions
+q-2-1-010
+·
+Enterprise Data Platform with Federated Queries
+Correct
+The data platform's query_snowflake tool has a description that reads: 'Queries Snowflake data warehouse. Accepts SQL.' The agent correctly uses the tool but frequently sends queries using PostgreSQL-specific syntax (e.g. ILIKE, string_agg) that Snowflake rejects. What is the most effective fix?
+
+
+C
+Add a system prompt instruction listing all Snowflake-specific SQL functions the agent should use.
+
+A system prompt instruction is brittle and consumes context tokens for every turn, even when the Snowflake tool is not being used. The tool description is the correct place for tool-specific dialect guidance.
+
+
+A
+Add a SQL syntax validation layer in front of the MCP tool that rejects non-Snowflake syntax before execution.
+
+A validation layer adds infrastructure complexity and maintenance burden. The root cause is that the tool description does not specify which SQL dialect to use. Fixing the description is the proportionate first step.
+
+
+D
+Have the MCP server automatically translate PostgreSQL syntax to Snowflake syntax before executing the query.
+
+Auto-translation is fragile and cannot handle all dialect differences. It masks the problem rather than fixing it and introduces a complex transformation layer prone to edge cases.
+
+
+B
+Expand the tool description to specify that the tool accepts Snowflake SQL dialect, include examples of supported functions (e.g. LISTAGG instead of string_agg, ILIKE is supported), and note dialect differences from PostgreSQL.
+
+The description says 'Accepts SQL' without specifying the dialect. The agent defaults to PostgreSQL syntax because it has no guidance on dialect differences. Adding dialect-specific examples and boundary conditions in the description directly resolves the misrouting.
+
+Where this comes from
+
+Lesson 2.1: Tool Interface Design (Dialect-specific descriptions)
+Q05
+·
+D4
+4.6 output-validation / self-review-bias
+q-4-6-006
+·
+Content Moderation and Classification System
+Correct
+The moderation team asks a single Claude session to classify a post, then immediately asks the same session to independently review its own classification for quality assurance. The 'review' agrees with the original classification 98% of the time, including cases that human auditors later identify as errors. Why is this self-review ineffective?
+
+
+B
+The same session retains the reasoning context from the original classification — the model is anchored to its own reasoning and cannot independently re-evaluate the content. Use a separate agent instance with no access to the original classification for genuine independent review
+
+Self-review within the same session is fundamentally limited because the model's conversation context includes the original reasoning. It will naturally be anchored to its prior conclusions. An independent instance with no access to the original decision evaluates the content fresh, providing genuine quality assurance.
+
+
+C
+The model's temperature is too low, producing deterministic agreement — increase temperature for the review pass
+
+Temperature affects sampling randomness, not reasoning independence. Higher temperature may occasionally produce different outputs but does not create genuine independent review. The model is still anchored to its own prior reasoning in the same session.
+
+
+D
+Self-review is effective but the 98% agreement rate simply reflects high initial accuracy — the 2% disagreement is the expected error rate
+
+Human auditors found errors in cases where the self-review agreed, proving the 98% agreement does not reflect accuracy. The self-review is confirming errors, not catching them, due to same-session reasoning bias.
+
+
+A
+The model needs a stronger review prompt with explicit instructions to look for errors in the original classification
+
+Stronger instructions do not overcome the fundamental limitation. The same session retains the reasoning context from the original classification, biasing the review toward agreement.
+
+Where this comes from
+
+Lesson 4.6: Multi-Instance Review and Output Validation (Self-review limitation)
+Q06
+·
+D1
+1.5 multi-agent-systems / scoped-tools
+q-1-5-005
+·
+Multi-Agent Research System
+Incorrect
+A coordinator delegates to a data collection agent (`web_search`, `database_query`) and an analysis agent (`calculate`, `chart_generate`). In testing, the analysis agent calls `web_search` directly to fetch extra context, bypassing the data collection agent. What is the architectural violation and how should it be fixed?
+
+
+C
+Allow the analysis agent to keep web_search access since it sometimes needs additional context for better analysis
+
+This violates scoped tool access and bypasses the data collection agent's role. If the analysis agent needs more data, the correct flow is: analysis agent signals the coordinator, coordinator delegates to the data collection agent, results flow back through the coordinator.
+
+
+A
+The analysis agent's allowedTools list includes web_search, which should be removed to enforce scoped tool access. Only the data collection agent should have web_search.
+
+Each agent should only have tools relevant to its specific role. The analysis agent should have calculate and chart_generate, not web_search. If the analysis agent needs additional data, it should request it through the coordinator, which then delegates to the data collection agent. This enforces the scoped tool access principle.(correct answer)
+
+
+B
+Add a system prompt instruction telling the analysis agent not to use web_search even though it has access
+
+Prompt instructions are probabilistic. The agent is already occasionally using web_search despite the architectural intent. The fix is to remove the tool from allowedTools, providing deterministic enforcement rather than hoping the prompt works.
+
+
+D
+Implement a PostToolUse hook that logs when the analysis agent uses web_search for monitoring purposes
+
+Logging the violation does not prevent it. The architectural fix is to remove web_search from the analysis agent's allowedTools, not to monitor its misuse.(your answer)
+
+Where this comes from
+
+Lesson 1.4: Workflow Enforcement and Handoff (Scoped tool access)
+Anthropic: Claude Agent SDK Overview↗
+Q07
+·
+D3
+3.4 permissions-security / mode-selection
+q-3-4-001
+·
+Code Generation with Claude Code
+Correct
+Your team faces three tasks: (1) restructure a monolith into microservices, (2) fix a null pointer exception in a single function with a clear stack trace, (3) migrate from one logging library to another across 30 files. Which mode should be used for each?
+
+
+D
+Direct execution for all three with comprehensive upfront instructions
+
+Task 1 (monolith restructuring) requires codebase exploration and architectural design. Comprehensive upfront instructions assume you already know the right structure without exploring.
+
+
+B
+Plan mode for (1) and (3), direct execution for (2)
+
+Task 1 involves architectural decisions with multiple valid approaches. Task 3 affects 30 files with a pattern that needs design before execution. Task 2 is a single-function fix with a clear stack trace — direct execution is appropriate.
+
+
+A
+Plan mode for all three, since they all involve code changes
+
+Task 2 is a well-understood, limited-scope bug fix. Plan mode would waste time for a change where the problem and solution are already clear.
+
+
+C
+Plan mode for (1), direct execution for (2) and (3)
+
+Task 3 affects 30 files and requires a consistent migration strategy. Without planning, you risk inconsistent application of the logging library change across files.
+
+Where this comes from
+
+Lesson 3.4: Plan Mode vs Direct Execution (Plan vs direct execution)
+Lesson 3.4: Plan Mode vs Direct Execution (Plan mode)
+Lesson 3.4: Plan Mode vs Direct Execution (Direct execution)
+Q08
+·
+D3
+3.2 claude-md-files / commands-vs-skills
+q-3-2-001
+·
+Code Generation with Claude Code
+Incorrect
+A team wants a /review command available to everyone who clones the repository. A developer also wants a personal /brainstorm skill that produces verbose codebase analysis output without cluttering the main conversation. Where should each be created and what configuration does the skill need?
+
+
+D
+Both in ~/.claude/commands/ with instructions for each developer to copy them locally
+
+~/.claude/commands/ (or equivalently ~/.claude/skills/) is user-scoped and not shared via version control. Requiring manual copying defeats the purpose of project-scoped configuration.
+
+
+A
+Both in .claude/commands/ with the brainstorm skill using context: fork
+
+The /brainstorm skill should be personal (not shared with the team), so it should not go in the project-scoped .claude/commands/ directory.
+
+
+B
+/review in .claude/commands/ for team sharing; /brainstorm as a SKILL.md in ~/.claude/skills/ with context: fork frontmatter
+
+/review needs to be project-scoped (.claude/commands/ or equivalently .claude/skills/) so it is shared via version control. Both paths create identical /commands. /brainstorm is personal, so it goes in ~/.claude/skills/. context: fork isolates the verbose analysis output from the main conversation.(correct answer)
+
+
+C
+/review in CLAUDE.md as a documented procedure; /brainstorm in .claude/skills/ with allowed-tools restrictions
+
+CLAUDE.md is for always-loaded standards, not command definitions. The brainstorm skill needs context: fork for output isolation, not just allowed-tools.(your answer)
+
+Where this comes from
+
+Lesson 3.2: Custom Slash Commands and Skills (Where to place commands)
+Lesson 3.2: Custom Slash Commands and Skills (Skills system)
+Claude Code: Skills↗
+Q09
+·
+D4
+4.2 structured-output / few-shot-style
+q-4-2-002
+·
+Code Generation with Claude Code
+Correct
+Your Claude Code agent generates unit tests for the TypeScript monorepo. When given detailed instructions alone, it produces tests with inconsistent assertion styles: sometimes using expect().toBe(), sometimes assert.equal(), and occasionally mixing both in the same file. Adding more detailed instructions about assertion style did not fix the problem. What should you do next?
+
+
+B
+Add a linter post-processing step to automatically convert all assertions to a single style
+
+Post-processing masks the problem rather than solving it. The model should learn to produce consistent output directly, which few-shot examples achieve more effectively.
+
+
+C
+Add 2-4 few-shot examples showing complete test files with the desired assertion style and reasoning for why that style was chosen over alternatives
+
+This is partially correct but incomplete. The examples only cover the assertion style preference. Without covering varied scenarios (async functions, error handling), the model pattern-matches the specific cases shown rather than generalising the style consistently across all test types.
+
+
+D
+Add 2-4 few-shot examples demonstrating the desired assertion style with reasoning for each testing decision, covering edge cases like async functions and error handling
+
+Few-shot examples are the most effective technique when detailed instructions alone produce inconsistent formatting. Including 2-4 examples with reasoning teaches generalisation to novel patterns, not just pattern-matching. Covering varied scenarios (async, error handling) ensures the model generalises correctly.
+
+
+A
+Switch to a different model that better follows formatting instructions
+
+The issue is not model capability. When detailed instructions alone produce inconsistent formatting, the correct intervention is few-shot examples, not a model change.
+
+Where this comes from
+
+Lesson 4.4: Few-Shot Prompting (Few-shot examples)
+Anthropic: Multishot (Few-Shot) Prompting↗
+Q10
+·
+D5
+5.6 production-reliability / claim-source-mapping
+q-5-6-002
+·
+Multi-Agent Research System
+Correct
+A multi-agent research system has three subagents (financial filings, news, technical white papers) and a synthesis agent. Each subagent returns properly attributed findings, but the final synthesised report has no source attribution: stakeholders cannot trace which claim came from which source. Which fix addresses the root cause?
+
+
+C
+Require subagents to output structured claim-source mappings (claim, source URL, document name, excerpt, publication date) and instruct the synthesis agent to preserve and merge these mappings through the synthesis process
+
+Structured claim-source mappings survive synthesis because they are data structures, not prose that gets rewritten. The synthesis agent can merge mappings from multiple subagents while preserving the link between each claim and its source. This also enables content-appropriate rendering: financial data as tables, news as prose, technical findings as lists — each with attribution intact.
+
+
+D
+Store all subagent outputs in a database and have the synthesis agent reference database entries by ID instead of incorporating content directly
+
+This adds infrastructure complexity without solving the synthesis problem. The synthesis agent still needs to merge and present findings coherently. Database references do not prevent attribution loss during the summarisation and rewriting that synthesis inherently requires.
+
+
+B
+Have each subagent include source URLs as inline hyperlinks in their prose output so the synthesis agent can preserve them
+
+Inline hyperlinks in prose are fragile — the synthesis agent will rewrite, merge, and compress prose during summarisation, stripping or disconnecting links from their associated claims. Attribution must be in structured data, not embedded in prose that gets rewritten.
+
+
+A
+Append a bibliography section at the end of the report listing all sources each subagent consulted
+
+A bibliography lists sources but does not map specific claims to specific sources. Stakeholders need to know which claim came from which document, not just which documents were consulted overall. This is document-level attribution, not claim-level provenance.
+
+Where this comes from
+
+Lesson 5.6: Information Provenance and Multi-Source Synthesis (Structured claim-source mappings)
+Lesson 5.6: Information Provenance and Multi-Source Synthesis (Attribution preservation)
+Q11
+·
+D3
+3.4 permissions-security / plan-mode
+q-3-4-002
+·
+Code Generation with Claude Code
+Incorrect
+A developer is migrating a monorepo from CommonJS to ES modules: 80+ files, multiple valid strategies, knock-on effects in build tooling, test configuration, and `package.json`. They start in direct execution mode and begin converting files. Halfway through, the chosen import resolution strategy breaks the test runner. What went wrong?
+
+
+B
+The developer should have provided more detailed upfront instructions to direct execution specifying the exact migration pattern for every file type
+
+The core issue is not insufficient instructions — it is that the developer did not explore the codebase to understand dependencies before choosing a strategy. More detailed instructions would still have used the wrong strategy because the test runner conflict was not known upfront.
+
+
+A
+The developer should have used plan mode to explore the codebase, map dependencies, and evaluate migration strategies before committing to an approach
+
+An 80+ file migration with multiple valid strategies and cross-cutting concerns (build tooling, test configuration, package.json) is a textbook plan mode scenario. Plan mode would have revealed the test runner incompatibility before any files were changed. Starting with direct execution for a complex, multi-approach task risks costly rework.(correct answer)
+
+
+C
+The developer should have used the interview pattern to have Claude ask questions about the migration before starting
+
+The interview pattern helps surface considerations the developer might miss, but the fundamental issue is choosing direct execution for a task that requires codebase exploration and strategy evaluation. Plan mode, not just questioning, was needed to map dependencies and test impacts.(your answer)
+
+
+D
+The developer should have written a complete test suite first and iterated by sharing test failures
+
+Test-driven iteration is an iterative refinement technique (task statement 3.5), not a substitute for upfront planning. The root cause is skipping plan mode for a complex task, not the absence of tests. The existing test runner itself was the source of the incompatibility.
+
+Where this comes from
+
+Lesson 3.4: Plan Mode vs Direct Execution (Plan mode)
+Lesson 3.4: Plan Mode vs Direct Execution (Recognising complexity)
+Q12
+·
+D5
+5.4 rate-limiting-quotas / scratchpad
+q-5-4-007
+·
+Enterprise Data Platform with Federated Queries
+Incorrect
+A data engineer delegates a complex cross-database analysis to the platform agent: join Snowflake billing data with PostgreSQL usage data, apply currency normalisation, and produce a cost-per-user breakdown by region. The agent's context fills rapidly as it accumulates intermediate query results. What is the most effective strategy for managing this multi-step analysis within context limits?
+
+
+D
+Summarise intermediate results between steps to reduce their token footprint in the conversation context.
+
+Summarising intermediate numerical results risks the progressive summarisation trap — exact billing figures, usage counts, and exchange rates may be compressed into qualitative descriptions, causing calculation errors in subsequent steps.(your answer)
+
+
+B
+Execute all queries in a single SQL statement using cross-database joins to avoid intermediate results entirely.
+
+Cross-database joins between Snowflake and PostgreSQL are not possible in a single SQL statement — they are separate database systems accessed through different MCP tools. The multi-step approach is architecturally necessary.
+
+
+A
+Write intermediate results to a scratchpad file after each step, then read back only the final aggregated data needed for the cost-per-user calculation.
+
+Scratchpad files offload intermediate results from the context window. Each step writes its output to a file, keeping the context budget free for the current step's reasoning. The final step reads back only the aggregated data it needs, avoiding the accumulation of raw intermediate results in context.(correct answer)
+
+
+C
+Delegate each step to a separate subagent so each runs with a fresh context window, then combine their outputs.
+
+Subagent delegation is useful for independent parallel tasks, but this analysis has sequential dependencies (each step depends on the previous step's output). Subagents would need the same intermediate data passed to them, merely shifting the context problem rather than solving it.
+
+Where this comes from
+
+Lesson 5.4: Codebase Exploration and Context Degradation (Scratchpad files)
+Q13
+·
+D1
+1.5 multi-agent-systems / context-passing
+q-1-5-004
+·
+Multi-Agent Research System
+Correct
+A coordinator spawns a research subagent to investigate market trends. The subagent returns detailed findings. The coordinator then needs to pass these findings to a synthesis subagent for report writing. However, the synthesis subagent produces a report that contradicts the research findings. What is the most likely cause?
+
+
+A
+The synthesis subagent has a conflicting system prompt that overrides the research data
+
+While possible, conflicting system prompts would produce consistently wrong outputs across all requests. The more common cause is that the coordinator is not passing the full research output, so the synthesis agent fills gaps with its own training data.
+
+
+B
+The coordinator is passing a summary of the research findings instead of the full structured output, causing the synthesis agent to fill in gaps from its training data
+
+Subagents do not share memory. The coordinator must explicitly pass the complete research output to the synthesis agent. If the coordinator only passes a summary, the synthesis agent has no access to the detailed findings and will rely on its training data to fill gaps, potentially contradicting the actual research.
+
+
+D
+The two subagents are using different model versions with different training data
+
+Model version differences would not cause contradictions with explicitly provided research data. The issue is that the research data is not being fully passed to the synthesis agent, not that the agents have different base knowledge.
+
+
+C
+The synthesis subagent has access to web search tools and is finding contradictory information online
+
+A synthesis subagent should not have web search tools — that violates scoped tool access. The synthesis agent should only have tools related to writing and formatting, not research.
+
+Where this comes from
+
+Lesson 1.3: Subagent Invocation and Context Passing (Context passing)
+Lesson 1.3: Subagent Invocation and Context Passing (Structured metadata format)
+Q14
+·
+D2
+2.2 mcp-server-implementation / error-categories
+q-2-2-007
+·
+Enterprise Data Platform with Federated Queries
+Correct
+A `query_postgres` MCP tool returns 500 on transient server overload and 404 on missing tables. The agent retries both identically, exhausting retries on missing tables and then failing to retry once the server recovers. What change to the error response structure would fix this?
+
+
+B
+Classify errors into structured categories — transient (server overload, network timeout) and validation (missing table, invalid column) — with the MCP isError flag and a category field, so the agent retries only transient errors.
+
+Structured error categories give the agent explicit guidance on recovery strategy. Transient errors (overload, timeout) warrant retries. Validation errors (missing table, invalid column) are permanent and should not be retried. This eliminates wasted retries on unrecoverable errors.
+
+
+D
+Increase the retry limit from 3 to 10 so the agent has enough attempts to cover both transient and permanent errors.
+
+More retries waste time on permanent errors (missing tables will never appear) and add unnecessary latency. The problem is retry categorisation, not retry count.
+
+
+A
+Return all errors with the MCP isError flag set to true and include the HTTP status code in the error message text so the agent can parse it.
+
+Embedding status codes in free-text messages requires the agent to parse unstructured text, which is unreliable. Structured error categorisation is more robust than parsing status codes from strings.
+
+
+C
+Remove the retry logic entirely and escalate all errors to the user immediately for manual resolution.
+
+Removing retries eliminates the agent's ability to recover from transient failures automatically. The goal is smarter retries, not no retries.
+
+Where this comes from
+
+Lesson 2.2: Structured Error Responses (Four error categories)
+MCP: Tools Specification↗
+Q15
+·
+D5
+5.4 rate-limiting-quotas / compact
+q-5-4-006
+·
+Enterprise Data Platform with Federated Queries
+Correct
+A developer has been using the data platform agent in a single extended session for two hours, running complex federated queries, debugging SQL syntax, and iterating on report formatting. The agent now produces noticeably worse SQL and occasionally references table schemas from earlier queries that have since been corrected. What is the most effective intervention?
+
+
+A
+Use the /compact command, optionally passing focus instructions, to summarise the conversation so far and free context budget for current-state reasoning.
+
+Extended sessions cause context degradation as stale information (outdated schemas, abandoned approaches) competes with current context. /compact summarises the conversation history into a compressed form, freeing context budget. The optional [instructions] argument lets you bias the summary (for example, 'preserve the corrected schema for the orders table'). It is the documented mitigation for context degradation in long sessions, and the least disruptive option of the four.
+
+
+D
+Add a system prompt instruction telling the agent to ignore all schema information from more than 30 minutes ago.
+
+The agent has no reliable concept of message timestamps within the context window. Time-based instructions are unenforceable. The structural fix is to compress or remove stale context entries.
+
+
+B
+Start a completely new session and re-establish all context from scratch.
+
+A fresh session discards all accumulated context, including valuable recent work. /compact summarises the existing conversation while preserving the gist of recent work, which is less disruptive than starting over.
+
+
+C
+Increase the model's temperature parameter to improve creativity and reduce fixation on stale patterns.
+
+Temperature affects output randomness, not context quality. The problem is stale information in the context window polluting the agent's reasoning, not a lack of creative variation.
+
+Where this comes from
+
+Lesson 5.4: Codebase Exploration and Context Degradation (/compact)
+Q16
+·
+D4
+4.3 prompt-chaining / nullable-fields
+q-4-3-006
+·
+Content Moderation and Classification System
+Correct
+The moderation system uses tool_use with a JSON schema for classification output. All fields including 'sub_category' and 'target_demographic' are marked as required. Auditors discover that when a post is spam (which has no target demographic), the model fabricates plausible-sounding demographics like 'general public' or 'young adults.' What schema change prevents this fabrication?
+
+
+B
+Make 'target_demographic' nullable so the model can return null when the field is not applicable, rather than being forced to fabricate a value
+
+Required fields pressure the model to produce a value even when none exists. Making the field nullable gives the model a legitimate way to indicate 'not applicable,' eliminating the incentive to fabricate. This is the standard pattern for fields that apply conditionally.
+
+
+A
+Add a validation step that rejects target_demographic values for spam posts
+
+Post-hoc validation catches the problem but does not prevent it. The model still fabricates values; they are just rejected after the fact. Schema design should prevent fabrication at the source.
+
+
+C
+Remove 'target_demographic' from the schema entirely since it causes fabrication
+
+Removing the field loses valuable data for categories where target demographic is genuinely relevant (hate speech, harassment). The fix is making it nullable, not removing it.
+
+
+D
+Add a prompt instruction telling the model to leave target_demographic empty for spam posts
+
+Prompt instructions cannot override a schema that marks the field as required. The JSON schema enforces the constraint at the API level, and the model must comply with the schema regardless of prompt instructions.
+
+Where this comes from
+
+Lesson 4.2: Structured Output with Tool Use (Nullable fields)
+Q17
+·
+D2
+2.3 mcp-client-integration / consolidation
+q-2-3-008
+·
+Enterprise Data Platform with Federated Queries
+Incorrect
+The data platform team has built an MCP server with 22 tools: query_snowflake, query_postgres, query_api, plus 19 specialised tools for individual data transformations (pivot_table, calculate_percentile, normalise_currency, etc.). Agents take 3-4 turns to select the correct tool and frequently choose the wrong transformation. What is the most effective redesign?
+
+
+D
+Split the tools across two separate MCP servers — one for queries and one for transformations — to reduce cognitive load.
+
+MCP server boundaries are invisible to the agent. All tools from all connected servers appear in a single list. Splitting across servers does not reduce the number of tools the agent must choose from.(your answer)
+
+
+A
+Improve all 22 tool descriptions with detailed examples and boundary conditions to help the agent distinguish between them.
+
+Better descriptions help, but 22 tools still exceeds the practical limit for reliable selection. Research shows tool selection degrades significantly beyond 4-5 tools per agent. The tool count itself is the problem.
+
+
+C
+Use tool_choice: 'any' to force the agent to always call a tool, eliminating turns where the agent reasons without acting.
+
+Forcing tool calls does not improve selection accuracy — it just ensures the agent picks something, potentially the wrong tool. The root cause is too many similar tools, not too few tool calls.
+
+
+B
+Consolidate the 19 transformation tools into a single transform_data tool with a transform_type parameter, reducing the total to 4 tools.
+
+Reducing from 22 to 4 tools brings the count within the optimal 4-5 range for reliable tool selection. The 19 transformation tools share a common pattern (input data, transformation type, output format) and are natural candidates for consolidation into a single parameterised tool.(correct answer)
+
+Where this comes from
+
+Lesson 2.3: Tool Distribution and Tool Choice (Consolidating tools)
+Lesson 2.3: Tool Distribution and Tool Choice (Tool overload)
+Q18
+·
+D1
+1.7 error-recovery-resilience / fork-session
+q-1-7-003
+·
+Multi-Agent Research System
+Correct
+What is the purpose of fork_session in Claude Code?
+
+
+C
+To resume a previously terminated session from exactly where it left off
+
+Resuming a session is done with --resume, not fork_session. fork_session creates new branches, it does not resume existing sessions.
+
+
+B
+To split the current session into independent branches for divergent exploration from a shared baseline
+
+fork_session creates independent branches from a shared baseline. Each fork starts from the same point but can explore different approaches without contaminating each other. This is used when you want to try competing strategies from the same starting state.
+
+
+A
+To create a backup of the current session in case of errors
+
+fork_session is not a backup mechanism. It creates independent exploration branches for trying different approaches from the same starting point.
+
+
+D
+To merge the results of multiple subagents into a single output
+
+Result merging is the coordinator's responsibility. fork_session creates divergent branches; it does not merge anything.
+
+Where this comes from
+
+Lesson 1.3: Subagent Invocation and Context Passing (fork_session)
+Lesson 1.7: Session State and Resumption (Session management options)
+Anthropic: Claude Code Documentation↗
+Q19
+·
+D5
+5.3 long-conversations / silent-suppression
+q-5-3-006
+·
+Enterprise Data Platform with Federated Queries
+Correct
+The data platform agent queries three sources in sequence: Snowflake (succeeds), PostgreSQL (returns a connection timeout), and a pricing API (succeeds). The agent silently skips the PostgreSQL failure and produces a report using only Snowflake and API data, without informing the user that customer data is missing. What is the critical design failure?
+
+
+B
+The agent silently suppresses the error instead of propagating structured error context that annotates which data sources failed and what coverage the report actually has.
+
+Silent error suppression is one of the most dangerous anti-patterns in multi-source systems. The agent must propagate structured error context — identifying which sources failed, what data is missing, and what coverage the final report represents — so the user can make informed decisions about the report's completeness.
+
+
+C
+The agent should abort the entire report if any single data source fails, to avoid producing incomplete results.
+
+Aborting on any failure is overly conservative. Partial results with clear coverage annotations are often more useful than no results. The fix is transparency about what is missing, not refusing to produce anything.
+
+
+A
+The agent should retry the PostgreSQL query automatically with exponential backoff before producing the report.
+
+Automatic retries are appropriate for transient errors, but the critical failure is that the agent silently suppresses the error. Even after retries exhaust, the agent must surface the failure to the user rather than producing an incomplete report without disclosure.
+
+
+D
+The orchestrator should pre-check all data source connections before allowing the agent to begin querying.
+
+Pre-checking connections does not prevent runtime failures (a source can become unavailable between the check and the query). The agent must handle failures gracefully at query time with structured error propagation.
+
+Where this comes from
+
+Lesson 5.3: Error Propagation in Multi-Agent Systems (Silent suppression anti-pattern)
+Lesson 5.3: Error Propagation in Multi-Agent Systems (Structured error context)
+Q20
+·
+D1
+1.5 multi-agent-systems / pretooluse-enforcement
+q-1-5-010
+·
+Content Moderation and Classification System
+Incorrect
+Platform policy strictly prohibits the moderation system from auto-removing any post in the 'political speech' category without human approval. Currently this rule is enforced via the system prompt: 'Never auto-remove political speech without human approval.' Audit logs reveal that in 2% of cases the agent auto-removes political speech posts. What is the correct fix?
+
+
+B
+Add few-shot examples showing the correct workflow for political speech: classify, then escalate to human, never auto-remove
+
+Few-shot examples improve compliance rates but cannot guarantee 100% adherence. Platform policy requires deterministic enforcement, not improved probability.(your answer)
+
+
+C
+Implement a tool call interception hook that inspects the category before any removal tool executes — if the category is 'political_speech', block the removal and redirect to human review
+
+A tool call interception hook provides deterministic enforcement by physically blocking the removal tool when the content category is political speech. This is the only approach that guarantees 100% compliance with the policy, which is what platform rules require.(correct answer)
+
+
+D
+Route all political speech posts to a dedicated subagent that has no access to the auto-remove tool
+
+Routing to a restricted subagent is partially correct but relies on the coordinator to correctly identify political speech before routing. A hook on the removal tool itself is more robust because it catches violations regardless of routing decisions.
+
+
+A
+Strengthen the system prompt by adding the rule in multiple locations with bold formatting and emphasis
+
+Repeating the rule more emphatically is still a probabilistic approach. The existing 2% failure rate demonstrates that prompt-based enforcement cannot guarantee 100% compliance for a strict policy requirement.
+
+Where this comes from
+
+Lesson 1.5: Agent SDK Hooks (Tool call interception)
+Anthropic: Agent SDK Hooks↗
+Q21
+·
+D1
+1.3 guardrails-safety / structured-metadata
+q-1-3-001
+·
+Multi-Agent Research System
+Correct
+A synthesis agent produces a report with several claims that have no source attribution. The web search and document analysis subagents are working correctly and returning well-sourced results. What is the most likely root cause?
+
+
+B
+The coordinator is passing content to the synthesis agent without structured metadata (source URLs, document names, page numbers)
+
+Context passing must include structured data that separates content from metadata. Without source URLs and document names, the synthesis agent has no attribution information to include.
+
+
+C
+The web search subagent needs to return results in a different format
+
+The web search subagent is working correctly. The issue is how the coordinator passes its results to the synthesis agent.
+
+
+A
+The synthesis agent's system prompt does not require citations
+
+Even with citation requirements in the prompt, the synthesis agent cannot attribute claims to sources if the metadata was never passed to it.
+
+
+D
+The synthesis agent needs access to the web search tool directly
+
+Giving the synthesis agent web search tools violates the principle of scoped tool access and does not address the context passing failure.
+
+Where this comes from
+
+Lesson 1.3: Subagent Invocation and Context Passing (Structured metadata format)
+Lesson 1.3: Subagent Invocation and Context Passing (Context passing)
+Q22
+·
+D3
+3.2 claude-md-files / modular-import
+q-3-2-003
+·
+Code Generation with Claude Code
+Correct
+What does an `@./path/to/file.md` line in a CLAUDE.md do?
+
+
+A
+It conditionally loads external files only when specific file types are being edited
+
+`@` path imports do not provide conditional loading based on file types. Conditional loading is achieved through .claude/rules/ files with YAML frontmatter `paths`. An `@` import always inlines the referenced content when the surrounding CLAUDE.md is processed.
+
+
+D
+It loads MCP server configurations from external JSON files into the session
+
+MCP server configurations live in `.mcp.json` (and related per-scope files), not in CLAUDE.md `@` imports.
+
+
+B
+It imports npm packages or external dependencies into the Claude Code session
+
+`@` path imports in CLAUDE.md reference other documentation or instruction files, not code dependencies. Package management is handled through standard tools like npm.
+
+
+C
+It inlines the referenced file's content at load time, exactly as if the file had been pasted into the CLAUDE.md — useful for modular source files, but the loaded context is the same size as if everything were in one CLAUDE.md
+
+`@<path>` on its own line is the import directive (there is no `@import` keyword). The referenced file's content loads eagerly at load time, just as if it were inline in the CLAUDE.md. This keeps source files readable and lets each package import only the standards it needs, but it does not reduce per-session context usage.
+
+Where this comes from
+
+Lesson 3.1: CLAUDE.md Hierarchy and Scoping (@import in CLAUDE.md)
+Claude Code: Memory and CLAUDE.md↗
+Q23
+·
+D4
+4.5 prompt-optimisation / prompt-caching
+q-4-5-006
+·
+Code Generation with Claude Code
+Correct
+Your Claude Code setup uses a complex system prompt with detailed review instructions, code examples, and few-shot demonstrations that total 4,000 tokens. Each code review request adds 500-2,000 tokens of code to review. The team wants to optimise costs since the same review instructions are used for every request. What is the most effective optimisation?
+
+
+B
+Enable prompt caching with the static review instructions and examples at the beginning of the prompt, placing the dynamic code-to-review at the end
+
+Prompt caching caches the static prefix and reuses it across requests. With 4,000 tokens of static content reused for every review, caching provides significant cost savings without sacrificing review quality. Dynamic code goes at the end so the prefix remains cacheable.
+
+
+A
+Shorten the system prompt by removing few-shot examples to reduce per-request token costs
+
+Removing few-shot examples degrades review quality. The 4,000-token static prompt is the ideal candidate for caching, not trimming.
+
+
+C
+Switch all code reviews to the Message Batches API for 50% cost savings
+
+Code reviews in Claude Code are interactive, blocking workflows. The Batches API's 24-hour window makes it unsuitable for developer-facing reviews.
+
+
+D
+Reduce the number of few-shot examples from 4 to 1 and lower the temperature to compensate for the reduced guidance
+
+Lower temperature does not compensate for reduced examples. Fewer examples degrade quality. Prompt caching preserves the full prompt while reducing costs.
+
+Where this comes from
+
+Lesson 4.5: Batch Processing and Prompt Optimisation (Prompt caching layout)
+Anthropic: Prompt Caching↗
+Q24
+·
+D2
+2.5 tool-selection-routing / edit-recovery
+q-2-5-007
+·
+Code Generation with Claude Code
+Incorrect
+A developer asks Claude Code to modify a function in a large file. The Edit tool fails with a 'non-unique match' error because the target text appears in multiple locations within the file. What is the correct recovery approach?
+
+
+C
+Expand the Edit search string to include more surrounding context until it becomes unique in the file.
+
+The Edit tool's documented recovery path: 'Either provide a larger string with more surrounding context to make it unique, or use replace_all to change every instance of old_string.' Expanding context preserves Edit's surgical safety. If every occurrence should be changed identically, replace_all is the alternative.(correct answer)
+
+
+B
+Use Read to load the full file contents, then use Write to output the complete modified file with the change applied.
+
+Rewriting the whole file with Write is wasteful and unsafe — it loses the surgical-edit guarantees of Edit and risks dropping content. This is a last resort when no unique context exists, not the designed recovery path.
+
+
+D
+Split the file into smaller files so that each occurrence appears in only one file, then use Edit on each.
+
+Restructuring files to accommodate tool limitations is disproportionate effort. The Edit tool's own recovery path (more context or replace_all) handles non-unique matches without changing the codebase.(your answer)
+
+
+A
+Switch to Bash with sed to perform the replacement using line numbers instead of text matching.
+
+Bash with sed bypasses the built-in Edit tool's safety guarantees and is fragile when line numbers shift. The Edit tool documents the correct first recovery step (expand context or use replace_all).
+
+Where this comes from
+
+Lesson 2.5: Built-in Tools (Edit non-unique match recovery)
+Claude Code: Built-in Tools↗
+Q25
+·
+D4
+4.4 few-shot-examples / construction
+q-4-4-004
+·
+Code Generation with Claude Code
+Correct
+Your Claude Code agent generates API endpoint implementations. You provide detailed instructions specifying error handling conventions, but the generated code inconsistently handles async errors: sometimes using try/catch, sometimes using .catch(), and sometimes omitting error handling entirely. Adding more detailed instructions did not resolve the inconsistency. What is the most effective next step?
+
+
+C
+Set temperature to 0 to eliminate the randomness causing inconsistent error handling styles
+
+Temperature does not fix ambiguous criteria. If the instructions do not clearly demonstrate the preferred pattern, low temperature just makes the model consistently pick the same ambiguous interpretation, not necessarily the correct one.
+
+
+D
+Add a post-generation review step that rewrites any incorrect error handling patterns
+
+Post-processing adds cost and complexity. It is more effective to teach the model the correct pattern upfront with few-shot examples than to fix incorrect output afterwards.
+
+
+A
+Add a linting rule to catch missing error handling and reject generated code that fails the lint
+
+Linting can catch missing error handling but does not address the inconsistent style (try/catch versus .catch()). The model needs to see the desired pattern demonstrated, not just be told about it.
+
+
+B
+Add 2-4 few-shot examples demonstrating the correct error handling pattern across varied scenarios, including async/await, Promise chains, and edge cases, with reasoning for each choice
+
+When detailed instructions alone fail to produce consistent formatting, few-shot examples with reasoning are the correct escalation. Covering varied async scenarios prevents the model from pattern-matching only the specific cases shown and teaches it to generalise the error handling style.
+
+Where this comes from
+
+Lesson 4.4: Few-Shot Prompting (Effective examples)
+Anthropic: Multishot (Few-Shot) Prompting↗
+Q26
+·
+D3
+3.1 configuration-settings / path-rules
+q-3-1-002
+·
+Code Generation with Claude Code
+Incorrect
+A large TypeScript monorepo has a root CLAUDE.md with universal coding standards and a .claude/rules/ directory with topic-specific rule files. A developer notices that conventions from testing.md in .claude/rules/ are loading even when editing API handler files, consuming unnecessary tokens. The testing.md file has no YAML frontmatter. What should the developer do to fix this?
+
+
+B
+Add the testing conventions to the root CLAUDE.md instead, since rules files cannot be path-scoped
+
+Rules files absolutely support path scoping via YAML frontmatter with a paths field. Moving conventions to root CLAUDE.md would make the token efficiency problem worse, not better, because root CLAUDE.md loads for every session.
+
+
+A
+Move testing.md out of .claude/rules/ and into a directory-level CLAUDE.md inside the test folder
+
+Test files are co-located with source files throughout 200+ packages in this monorepo. A directory-level CLAUDE.md in a single test folder would not cover test files in other directories, and creating one in every directory would be unmaintainable.
+
+
+D
+Use an @./.claude/rules/testing.md line in the root CLAUDE.md so the file only loads when the import is reached
+
+@ path imports load eagerly when the CLAUDE.md is loaded — the imported file's content is inlined at that moment, regardless of which file the developer is editing. They are a source-organisation mechanism, not a conditional-loading mechanism. Path-scoped frontmatter in .claude/rules/ is the only way to make rule files load only for matching paths.(your answer)
+
+
+C
+Add YAML frontmatter with paths: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts"] to testing.md so it only loads when editing test files
+
+Without YAML frontmatter, rule files in .claude/rules/ load for all sessions. Adding a paths field with glob patterns restricts loading to sessions where the developer is editing matching files. This is the correct approach for token-efficient, conditional convention loading.(correct answer)
+
+Where this comes from
+
+Lesson 3.3: Path-Specific Rules (Path-specific rules)
+Lesson 3.1: CLAUDE.md Hierarchy and Scoping (.claude/rules/ directory)
+Q27
+·
+D2
+2.4 tool-error-handling / build-vs-use
+q-2-4-007
+·
+Enterprise Data Platform with Federated Queries
+Incorrect
+An enterprise data platform team is evaluating how to integrate with their existing PostgreSQL database, Slack workspace, and a custom internal approval workflow. A developer proposes building three custom MCP servers. What is the correct approach?
+
+
+B
+Use community MCP servers for PostgreSQL and Slack, and build a custom server only for the internal approval workflow that has no community equivalent.
+
+Community servers should be evaluated first for standard integrations. PostgreSQL and Slack have well-maintained community MCP servers. The internal approval workflow is team-specific with no community equivalent, making it the only justified custom build.(correct answer)
+
+
+A
+Build all three custom MCP servers to ensure tight integration with the team's specific requirements and coding standards.
+
+Building custom servers for PostgreSQL and Slack is unnecessary when well-maintained community servers already exist for these standard integrations. Custom builds should be reserved for genuinely unique workflows.(your answer)
+
+
+C
+Skip MCP entirely and use direct API calls from Bash for all three integrations to avoid the overhead of running MCP servers.
+
+Direct API calls bypass the MCP tool interface, losing the benefits of structured tool descriptions, standardised error handling, and agent-native integration. MCP servers provide a consistent interface that agents understand natively.
+
+
+D
+Use community MCP servers for all three integrations, adapting the internal approval workflow to fit an existing community server's interface.
+
+Forcing a custom internal workflow into a community server's interface leads to awkward abstractions and missing functionality. The community-first principle applies to standard integrations, not to genuinely unique team-specific workflows.
+
+Where this comes from
+
+Lesson 2.4: MCP Server Integration (Build-vs-use)
+Claude Code: MCP Server Configuration↗
+Q28
+·
+D1
+1.7 error-recovery-resilience / fresh-start
+q-1-7-004
+·
+Code Generation with Claude Code
+Incorrect
+A Claude Code agent has been working on a feature branch for 45 minutes and has accumulated extensive context about the codebase. The developer notices that several tool results from early in the session (file reads from 40 minutes ago) are now stale because a colleague pushed changes to those files. The agent is making recommendations based on the outdated file contents. What is the best recovery strategy?
+
+
+C
+Start a fresh session with a summary injection that captures the key findings and decisions from the previous session, then read the changed files for current state
+
+Fresh start with summary injection is the prescribed recovery strategy for stale tool results. It preserves the valuable insights and decisions from the previous session while eliminating the stale data. Reading the changed files in the new session ensures the agent works from current state.(correct answer)
+
+
+D
+Use fork_session to create a new branch that excludes the stale tool results
+
+fork_session creates a branch from the current state, which includes the stale tool results. It does not allow selective exclusion of context. It is designed for divergent exploration, not for stale context recovery.(your answer)
+
+
+A
+Continue in the current session and ask the agent to re-read the changed files
+
+While re-reading files updates the information, the stale results remain in the context window. The agent may still reference the outdated content from earlier in the conversation, leading to contradictory reasoning.
+
+
+B
+Start a completely new session with no context from the previous session
+
+Starting fresh discards 45 minutes of accumulated context and architectural understanding. The agent would need to rediscover all the insights it already found about the codebase.
+
+Where this comes from
+
+Lesson 1.7: Session State and Resumption (Stale context)
+Lesson 1.7: Session State and Resumption (Decision matrix)
